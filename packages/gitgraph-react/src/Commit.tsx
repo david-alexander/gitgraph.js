@@ -112,34 +112,76 @@ export const Commit = (props: CommitsProps) => {
 
     const padding = 10;
 
-    let translateX = commitMessagesX;
+    const side: 'left' | 'right' = (commit.x === 0) ? 'left' : 'right';
+
+    const parts: { width: () => number, setX: (x: number) => void }[] = [];
 
     if (branchLabelRef.current) {
-      setBranchLabelX(translateX);
+      parts.push({
+        setX: (x) => setBranchLabelX(x),
 
-      // For some reason, one paddingX is missing in BBox width.
-      const branchLabelWidth =
-        branchLabelRef.current.getBBox().width + BranchLabel.paddingX;
-      translateX += branchLabelWidth + padding;
+        width: () => {
+          // For some reason, one paddingX is missing in BBox width.
+          const branchLabelWidth =
+            branchLabelRef.current!.getBBox().width + BranchLabel.paddingX;
+          return branchLabelWidth + padding;
+        }
+      });
     }
 
-    const allTagXs = tagRefs.current.map((tag) => {
-      if (!tag) return 0;
+    const allTagXs = tagRefs.current.map((tag) => 0);
 
-      const tagX = translateX;
+    tagRefs.current.forEach((tag, i) => {
+      if (!tag) return;
 
-      // For some reason, one paddingX is missing in BBox width.
-      const tagWidth = tag.getBBox().width + TAG_PADDING_X;
-      translateX += tagWidth + padding;
+      parts.push({
+        setX: (x) => allTagXs[i] = x,
 
-      return tagX;
+        width: () => {
+          // For some reason, one paddingX is missing in BBox width.
+          const tagWidth = tag.getBBox().width + TAG_PADDING_X;
+          return tagWidth + padding;
+        }
+      });
     });
 
-    setTagXs(allTagXs);
-
     if (messageRef.current) {
-      setMessageX(translateX);
+      parts.push({
+        setX: (x) => setMessageX(x),
+
+        width: () => {
+          const messageWidth = messageRef.current.getBBox().width;
+          return messageWidth;
+        }
+      });
     }
+
+    if (side === 'left')
+    {
+      // We'll store X position progressively and translate elements.
+      let translateX = -gitgraph.template.branch.spacing / 2;
+
+      parts.reverse();
+      for (const { setX, width } of parts)
+      {
+        translateX -= width();
+        setX(translateX);
+      }
+    }
+    else
+    {
+      // We'll store X position progressively and translate elements.
+      // let translateX =  commitMessagesX;
+      let translateX =  commit.x + gitgraph.template.branch.spacing;
+
+      for (const { setX, width } of parts)
+      {
+        setX(translateX);
+        translateX += width();
+      }
+    }
+
+    setTagXs(allTagXs);
   }, [tagRefs, gitgraph, commitMessagesX]);
 
   const shouldRenderTooltip =

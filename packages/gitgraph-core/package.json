@@ -35,7 +35,6 @@
     "watch": "tsc -w",
     "test": "jest",
     "build": "run-s build:*",
-    "build:clear": "rimraf ./lib",
     "build:tsc": "tsc",
     "build:bundle": "rollup -c rollup.config.js",
     "build:browserify": "browserify ./lib/bundle.umd.js -o ./lib/bundle.js",

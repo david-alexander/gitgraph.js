@@ -70,6 +70,7 @@ function createGitgraph(
       branchLabel: SVGGElement | null;
       tags: SVGGElement[];
       message: SVGGElement | null;
+      commit: Commit;
     };
   } = {};
   // Store a map to replace commits y with the correct value,
@@ -195,35 +196,82 @@ function createGitgraph(
       // Ensure commits elements (branch labels, message…) are well positionned.
       // It can't be done at render time since elements size is dynamic.
       Object.keys(commitsElements).forEach((commitHash) => {
-        const { branchLabel, tags, message } = commitsElements[commitHash];
+        const { branchLabel, tags, message, commit } = commitsElements[commitHash];
 
-        // We'll store X position progressively and translate elements.
-        let x = commitMessagesX;
+        const side: 'left' | 'right' = (commit.x === 0) ? 'left' : 'right';
+
+        const parts: (() => { element: SVGElement, width: number })[]  = [];
 
         if (branchLabel) {
-          moveElement(branchLabel, x);
-
-          // BBox width misses box padding
-          // => they are set later, on branch label update.
-          // We would need to make branch label update happen before to solve it.
-          const branchLabelWidth =
-            branchLabel.getBBox().width + 2 * BRANCH_LABEL_PADDING_X;
-          x += branchLabelWidth + padding;
+          parts.push(() => {
+            // moveElement(branchLabel, x);
+            
+            // BBox width misses box padding
+            // => they are set later, on branch label update.
+            // We would need to make branch label update happen before to solve it.
+            const branchLabelWidth =
+              branchLabel.getBBox().width + 2 * BRANCH_LABEL_PADDING_X;
+            // x += branchLabelWidth + padding;
+            return { element: branchLabel, width: branchLabelWidth + padding };
+          });
         }
 
         tags.forEach((tag) => {
-          moveElement(tag, x);
+          parts.push(() => {
+            // moveElement(tag, x);
 
-          // BBox width misses box padding and offset
-          // => they are set later, on tag update.
-          // We would need to make tag update happen before to solve it.
-          const offset = parseFloat(tag.getAttribute("data-offset") || "0");
-          const tagWidth = tag.getBBox().width + 2 * TAG_PADDING_X + offset;
-          x += tagWidth + padding;
+            // BBox width misses box padding and offset
+            // => they are set later, on tag update.
+            // We would need to make tag update happen before to solve it.
+            const offset = parseFloat(tag.getAttribute("data-offset") || "0");
+            const tagWidth = tag.getBBox().width + 2 * TAG_PADDING_X + offset;
+            // x += tagWidth + padding;
+            return { element: tag, width: tagWidth + padding };
+          });
         });
 
         if (message) {
-          moveElement(message, x);
+          parts.push(() => {
+            // moveElement(message, x);
+            
+            const messageWidth = message.getBBox().width + 2;
+            return { element: message, width: messageWidth };
+
+            // const messageText = message.querySelector('text');
+
+            // if (messageText)
+            // {
+            //   messageText.setAttribute('text-anchor', isLeft ? 'end' : 'start');
+            // }
+          });
+        }
+
+        if (side === 'left')
+        {
+          // We'll store X position progressively and translate elements.
+          let x = 0;
+
+          parts.reverse();
+          for (const part of parts)
+          {
+            const { element, width } = part();
+            
+            x -= width;
+            moveElement(element, x);
+          }
+        }
+        else
+        {
+          // We'll store X position progressively and translate elements.
+          let x =  commitMessagesX;
+
+          for (const part of parts)
+          {
+            const { element, width } = part();
+            
+            moveElement(element, x);
+            x += width;
+          }
         }
       });
     }
@@ -615,6 +663,7 @@ function createGitgraph(
       branchLabel: null,
       tags: [],
       message: null,
+      commit
     };
   }
 }

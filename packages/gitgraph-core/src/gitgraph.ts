@@ -59,7 +59,7 @@ class GitgraphCore<TNode = SVGElement> {
     );
   }
   public get shouldDisplayCommitMessage(): boolean {
-    return !this.isHorizontal && this.mode !== Mode.Compact;
+    return !this.isHorizontal /*&& this.mode !== Mode.Compact*/;
   }
 
   public reverseArrow: boolean;

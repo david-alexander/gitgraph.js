@@ -10,8 +10,8 @@ export class CompactGraphRows<TNode> extends RegularGraphRows<TNode> {
       const isFirstCommit = i === 0;
       if (!isFirstCommit) {
         const parentRow = this.getRowOf(commit.parents[0]);
-        const historyParent = commits[i - 1];
-        newRow = Math.max(parentRow + 1, this.getRowOf(historyParent.hash));
+        // const historyParent = commits[i - 1];
+        newRow = Math.max(parentRow + 1/*, this.getRowOf(historyParent.hash)*/);
 
         const isMergeCommit = commit.parents.length > 1;
         if (isMergeCommit) {

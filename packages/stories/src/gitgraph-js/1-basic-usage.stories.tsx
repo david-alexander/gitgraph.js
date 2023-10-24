@@ -12,8 +12,10 @@ storiesOf("gitgraph-js/1. Basic usage", module)
   .add("default", () => (
     <GraphContainer>
       {(graphContainer) => {
+        debugger;
         const gitgraph = createGitgraph(graphContainer, {
           generateCommitHash: createFixedHashGenerator(),
+          mode: Mode.Compact
         });
 
         const master = gitgraph.branch("master").commit("Initial commit");

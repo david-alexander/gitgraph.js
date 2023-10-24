@@ -142,17 +142,26 @@ class Gitgraph extends React.Component<GitgraphProps, GitgraphState> {
   public componentDidUpdate() {
     if (this.$graph.current) {
       const { height, width } = this.$graph.current.getBBox();
+
+      // Add `Tooltip.padding` so we don't crop the tooltip text.
+      // Add `BranchLabel.paddingX` so we don't cut branch label.
+      const fullWidth = (width + Tooltip.padding + BranchLabel.paddingX) * 2;
+
+      // Add `Tooltip.padding` so we don't crop tooltip text
+      // Add `BranchLabel.paddingY` so we don't crop branch label.
+      const fullHeight = height + Tooltip.padding + BranchLabel.paddingY;
+
       this.$graph.current.setAttribute(
         "width",
-        // Add `Tooltip.padding` so we don't crop the tooltip text.
-        // Add `BranchLabel.paddingX` so we don't cut branch label.
-        (width + Tooltip.padding + BranchLabel.paddingX).toString(),
+        fullWidth.toString(),
       );
       this.$graph.current.setAttribute(
         "height",
-        // Add `Tooltip.padding` so we don't crop tooltip text
-        // Add `BranchLabel.paddingY` so we don't crop branch label.
-        (height + Tooltip.padding + BranchLabel.paddingY).toString(),
+        fullHeight.toString(),
+      );
+      this.$graph.current.setAttribute(
+        "viewBox",
+        `${-fullWidth / 2} 0 ${fullWidth} ${fullHeight}`
       );
     }
 

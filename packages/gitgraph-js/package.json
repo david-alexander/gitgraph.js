@@ -41,7 +41,6 @@
     "prewatch": "rimraf ./lib",
     "watch": "tsc -w",
     "build": "run-s build:*",
-    "build:clear": "rimraf ./lib",
     "build:tsc": "tsc",
     "build:bundle": "rollup -c rollup.config.js",
     "build:minify": "uglifyjs -c -m -o ./lib/gitgraph.umd.min.js -- ./lib/gitgraph.umd.js",
